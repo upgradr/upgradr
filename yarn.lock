@@ -1485,6 +1485,10 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
+express-to-koa@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/express-to-koa/-/express-to-koa-1.0.3.tgz#b99c3a96497ef9a201357cfbb7697e4be93fa52c"
+
 extend@3, extend@~3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"

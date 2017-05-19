@@ -13,7 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express-to-koa": "^1.0.3",
     "github-integration": "^1.0.0",
+    "github-webhook-handler": "^0.6.0",
     "koa": "^2.2.0"
   },
   "devDependencies": {

@@ -1,5 +1,7 @@
 const Koa = require('koa');
 const createIntegration = require('github-integration');
+const createHandler = require('github-webhook-handler');
+const expressToKoa = require('express-to-koa');
 
 const port = process.env.PORT || 1337;
 const app = new Koa();
@@ -9,14 +11,34 @@ const integration = createIntegration({
   cert: process.env.INTEGRATION_CERT,
 });
 
+const handler = createHandler({
+  path: '/api',
+  secret: process.env.INTEGRATION_SECRET,
+});
+
+handler.on('issues', event => {
+  if (event.payload.action === 'opened') {
+    const installation = event.payload.installation.id;
+
+    integration.asInstallation(installation).then(github => {
+      github.issues.createComment({
+        owner: event.payload.repository.owner.login,
+        repo: event.payload.repository.name,
+        number: event.payload.issue.number,
+        body: 'Welcome to the robot uprising.',
+      });
+    });
+  }
+});
+
 app.use(async (ctx, next) => {
   if (ctx.url.match(/api/)) {
-    console.log('api route', process.env.INTEGRATION_ID);
-    ctx.body = { message: 'api' };
-  } else {
+    console.log('api route');
     await next();
   }
 });
+app.use(expressToKoa(handler));
+
 app.use(async (ctx, next) => {
   if (ctx.url.match(/authorize/)) {
     console.log('authorize route');
