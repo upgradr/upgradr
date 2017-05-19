@@ -38,31 +38,46 @@ handler.on('pull_request', event => {
   const { installation, pull_request, repository } = event.payload;
 
   integration.asInstallation(installation.id).then(github => {
-    console.log(event);
+    // console.log(event);
     try {
-      const data = {
+      github.repos.createStatus({
         owner: repository.owner.login,
         repo: repository.name,
         sha: pull_request.head.sha,
         state: 'pending',
-        // target_url: 'https://example.com',
-        description: 'checking... [ 1/3 ]',
+        description: 'checking... [ 1/5 ]',
         context: 'upgradr',
-      };
-
-      github.repos.createStatus(data);
+      });
       setTimeout(() => {
         github.repos.createStatus({
           owner: repository.owner.login,
-          repo: event.payload.repository.name,
+          repo: repository.name,
           sha: pull_request.head.sha,
           state: 'pending',
-          // target_url: 'https://example.com',
-          description: 'checking... [ 2/3 ]',
+          description: 'checking... [ 2/5 ]',
+          context: 'upgradr',
+        });
+      }, 5000);
+      setTimeout(() => {
+        github.repos.createStatus({
+          owner: repository.owner.login,
+          repo: repository.name,
+          sha: pull_request.head.sha,
+          state: 'pending',
+          description: 'checking... [ 3/5 ]',
           context: 'upgradr',
         });
       }, 10000);
-
+      setTimeout(() => {
+        github.repos.createStatus({
+          owner: repository.owner.login,
+          repo: repository.name,
+          sha: pull_request.head.sha,
+          state: 'pending',
+          description: 'checking... [ 4/5 ]',
+          context: 'upgradr',
+        });
+      }, 11000);
       setTimeout(() => {
         github.repos.createStatus({
           owner: repository.owner.login,
@@ -73,7 +88,7 @@ handler.on('pull_request', event => {
           description: 'all up-to-date',
           context: 'upgradr',
         });
-      }, 30000);
+      }, 13000);
     } catch (error) {
       console.log(error);
     }
