@@ -6,6 +6,14 @@ const expressToKoa = require('express-to-koa');
 const port = process.env.PORT || 1337;
 const app = new Koa();
 
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 const integration = createIntegration({
   id: process.env.INTEGRATION_ID,
   cert: process.env.INTEGRATION_CERT,
@@ -18,20 +26,57 @@ const handler = createHandler({
 
 handler.on('issues', event => {
   if (event.payload.action === 'opened') {
-    const installation = event.payload.installation.id;
+    const { installation } = event.payload;
 
-    integration.asInstallation(installation).then(github => {
+    integration.asInstallation(installation.id).then(github => {
       console.log(event);
-      // github.pullRequests.get({})
     });
   }
 });
 
 handler.on('pull_request', event => {
-  const installation = event.payload.installation.id;
+  const { installation, pull_request, repository } = event.payload;
 
-  integration.asInstallation(installation).then(github => {
+  integration.asInstallation(installation.id).then(github => {
     console.log(event);
+    try {
+      const data = {
+        owner: repository.owner.login,
+        repo: repository.name,
+        sha: pull_request.head.sha,
+        state: 'pending',
+        // target_url: 'https://example.com',
+        description: 'checking... [ 1/3 ]',
+        context: 'upgradr',
+      };
+
+      github.repos.createStatus(data);
+      setTimeout(() => {
+        github.repos.createStatus({
+          owner: repository.owner.login,
+          repo: event.payload.repository.name,
+          sha: pull_request.head.sha,
+          state: 'pending',
+          // target_url: 'https://example.com',
+          description: 'checking... [ 2/3 ]',
+          context: 'upgradr',
+        });
+      }, 10000);
+
+      setTimeout(() => {
+        github.repos.createStatus({
+          owner: repository.owner.login,
+          repo: event.payload.repository.name,
+          sha: pull_request.head.sha,
+          state: 'success',
+          target_url: 'https://example.com',
+          description: 'all up-to-date',
+          context: 'upgradr',
+        });
+      }, 30000);
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
 
