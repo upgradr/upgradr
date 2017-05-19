@@ -21,14 +21,30 @@ handler.on('issues', event => {
     const installation = event.payload.installation.id;
 
     integration.asInstallation(installation).then(github => {
-      github.issues.createComment({
-        owner: event.payload.repository.owner.login,
-        repo: event.payload.repository.name,
-        number: event.payload.issue.number,
-        body: 'Welcome to the robot uprising.',
-      });
+      console.log(event);
+      // github.pullRequests.get({})
     });
   }
+});
+
+handler.on('pull_request', event => {
+  const installation = event.payload.installation.id;
+
+  integration.asInstallation(installation).then(github => {
+    console.log(event);
+  });
+});
+
+handler.on('integration_installation', event => {
+  const installation = event.payload.installation.id;
+
+  integration.asInstallation(installation).then(() => {
+    if (event.payload.action === 'created') {
+      console.log('Integration installed', event.payload.installation);
+    } else if (event.payload.action === 'deleted') {
+      console.log('Integration uninstalled', event.payload.installation);
+    }
+  });
 });
 
 app.use(async (ctx, next) => {
